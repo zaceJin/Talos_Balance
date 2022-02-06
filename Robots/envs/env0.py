@@ -4,8 +4,8 @@ import numpy as np
 from Robots.ressources.plane import Plane # Terrain selected
 
 ROBOT_LIST = ["talos","solo"]
-#NAME_ROBOT = ROBOT_LIST[0] # talos
-NAME_ROBOT = ROBOT_LIST[1] # solo
+NAME_ROBOT = ROBOT_LIST[0] # talos
+#NAME_ROBOT = ROBOT_LIST[1] # solo
 if NAME_ROBOT=="talos":
     from Robots.ressources.talos import Talos as Robot
     HEIGHT_ROOT = 1.0   # Height of the robot when standing
@@ -252,4 +252,10 @@ class Env0(gym.Env):
     def _run_test_joints_solo():
         from Robots.ressources.solo import Solo
         Solo._run_test_joints_limit()
+        return None
+
+    @staticmethod
+    def _run_test_joints_talos():
+        from Robots.ressources.talos import Talos
+        Talos._run_test_joints_limit()
         return None

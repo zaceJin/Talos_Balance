@@ -80,11 +80,11 @@ if __name__ == "__main__":
     #Env0._run_test_reset_solo()
     #Env0._run_test_reset_talos()
     #Env0._run_test_joints_solo()
-    
+    Env0._run_test_joints_talos()
     # Train or play
-    TRAIN = False
-    if TRAIN:
-        train()
-    else:
-        model_name = "/devel/hpp/src/robots_RL/logs/model__1360000_steps"
-        play(model_name)
+    #TRAIN = True
+    #if TRAIN:
+    #    train()
+    #else:
+    #    model_name = "/devel/hpp/src/robots_RL/logs/model__1360000_steps"
+    #    play(model_name)
