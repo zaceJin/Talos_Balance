@@ -7,32 +7,28 @@ import time
 
 PATH_URDF = "/opt/openrobots/share/example-robot-data/robots/talos_data/robots"
 
-<<<<<<< Updated upstream
-#HIGH_GAINS = True
-HIGH_GAINS = False
-=======
 HIGH_GAINS = True
 
-MAX_TORQUES = 300. # Knee 300, Legs 160-200, Shoulder 22-44, 
-DIVIDE_BOUNDS_TORQUES = 8.0 # Used when control in torques, lower the torques bounds for controlled joints => To tune
->>>>>>> Stashed changes
+MAX_TORQUES = 300.  # Knee 300, Legs 160-200, Shoulder 22-44,
+DIVIDE_BOUNDS_TORQUES = 8.0  # Used when control in torques, lower the torques bounds for controlled joints => To tune
 
 if HIGH_GAINS:
-    FREQUENCY_TALOS_HZ  = 2000          # 5 khz
-    DT = 1/FREQUENCY_TALOS_HZ
-    FREQUENCY_UPDATE_CONTROL_HZ  = 50   # 50hz
-    DT_PD = 1/FREQUENCY_UPDATE_CONTROL_HZ
+    FREQUENCY_TALOS_HZ = 2000  # 5 khz
+    DT = 1 / FREQUENCY_TALOS_HZ
+    FREQUENCY_UPDATE_CONTROL_HZ = 50  # 50hz
+    DT_PD = 1 / FREQUENCY_UPDATE_CONTROL_HZ
     MULTIPLY_ALL_GAINS_P = 10.
     MULTIPLY_ALL_GAINS_D = 1.
 else:
-    FREQUENCY_TALOS_HZ  = 2000          # 2khz
-    DT = 1/FREQUENCY_TALOS_HZ
-    FREQUENCY_UPDATE_CONTROL_HZ  = 50   # 50hz
-    DT_PD = 1/FREQUENCY_UPDATE_CONTROL_HZ
+    FREQUENCY_TALOS_HZ = 2000  # 2khz
+    DT = 1 / FREQUENCY_TALOS_HZ
+    FREQUENCY_UPDATE_CONTROL_HZ = 50  # 50hz
+    DT_PD = 1 / FREQUENCY_UPDATE_CONTROL_HZ
     MULTIPLY_ALL_GAINS_P = 1.
     MULTIPLY_ALL_GAINS_D = 1.
 
-GRAVITY = [0,0,-9.81]
+GRAVITY = [0, 0, -9.81]
+
 
 class Talos:
 
@@ -44,41 +40,40 @@ class Talos:
             self.client = p.connect(p.DIRECT)
         # Pybullet settings
         p.setTimeStep(DT)
-        p.setGravity (GRAVITY[0], GRAVITY[1], GRAVITY[2])
+        p.setGravity(GRAVITY[0], GRAVITY[1], GRAVITY[2])
         # Load terrain
         self.terrain = class_terrain()
         # Robot positon and orientation at init
-        self._robot_start_pos    = [0.0, 0.0, 1.09]  # 1.08]
+        self._robot_start_pos = [0.0, 0.0, 1.09]  # 1.08]
         self._robot_start_orientation = p.getQuaternionFromEuler([0, 0, 0])
         # Load Talos
         p.setAdditionalSearchPath(PATH_URDF)
-<<<<<<< Updated upstream
         self._robot_ID = p.loadURDF("talos_reduced.urdf", self._robot_start_pos, self._robot_start_orientation,
-                                    useFixedBase=True)
-=======
-        self._robot_ID = p.loadURDF("talos_reduced.urdf",self._robot_start_pos, self._robot_start_orientation, useFixedBase=False)
->>>>>>> Stashed changes
+                                    useFixedBase=False)
         # Joints indices
-        self.controlled_joints, self.all_joints_names, self.all_joints = self._getcontrolled_joints() # indices of controlled joints
-        self.non_controlled_joints_to_reset = [21,38] # gripper_left_joint and gripper_right_joint
+        self.controlled_joints, self.all_joints_names, self.all_joints = self._getcontrolled_joints()  # indices of controlled joints
+        self.non_controlled_joints_to_reset = [21, 38]  # gripper_left_joint and gripper_right_joint
         # Joints bounds : Pos and Vel
-        self.joints_bound_pos_all, self.joints_bound_vel_all = self._getJointsLimitPosVel(self.all_joints)   # Limit of all joints Pos and Vel   
-        self.joints_bound_pos, self.joints_bound_vel = self._getJointsLimitPosVel(self.controlled_joints)    # Limit of controlled joints Pos and Vel
+        self.joints_bound_pos_all, self.joints_bound_vel_all = self._getJointsLimitPosVel(
+            self.all_joints)  # Limit of all joints Pos and Vel
+        self.joints_bound_pos, self.joints_bound_vel = self._getJointsLimitPosVel(
+            self.controlled_joints)  # Limit of controlled joints Pos and Vel
         # Gains PD of all joints
-        self.gains_P, self.gains_D                       = self._getGainsPD(self.all_joints)
+        self.gains_P, self.gains_D = self._getGainsPD(self.all_joints)
         self.gains_P_controlled, self.gains_D_controlled = self._getGainsPD(self.controlled_joints)
         # Controlled joints bounds : torques
         self.joints_bound_torques = self._get_max_torques_joints(self.controlled_joints)
         # Set motors control
         no_action = [0.0 for m in self.controlled_joints]
-        p.setJointMotorControlArray(self._robot_ID, jointIndices = self.controlled_joints, controlMode = p.VELOCITY_CONTROL, 
-                                    targetVelocities = no_action, forces = no_action)
-        p.setJointMotorControlArray (self._robot_ID, jointIndices = self.controlled_joints, controlMode = p.TORQUE_CONTROL, forces = no_action)
+        p.setJointMotorControlArray(self._robot_ID, jointIndices=self.controlled_joints, controlMode=p.VELOCITY_CONTROL,
+                                    targetVelocities=no_action, forces=no_action)
+        p.setJointMotorControlArray(self._robot_ID, jointIndices=self.controlled_joints, controlMode=p.TORQUE_CONTROL,
+                                    forces=no_action)
         # Reset robot
         self.reset()
         # - printInfos
         print("=== SOLO CREATED")
-        print("Number of controlled_joints : ",len(self.controlled_joints)," / ",len(self.all_joints))
+        print("Number of controlled_joints : ", len(self.controlled_joints), " / ", len(self.all_joints))
         pass
 
     def __del__(self):
@@ -88,9 +83,9 @@ class Talos:
     # Reset position, orientation, velocity, torques of the robot.
     def reset(self):
         # Reset base
-        p.resetBasePositionAndOrientation(self._robot_ID, 
+        p.resetBasePositionAndOrientation(self._robot_ID,
                                           self._robot_start_pos,
-                                          self._robot_start_orientation, 
+                                          self._robot_start_orientation,
                                           self.client)
         p.resetBaseVelocity(self._robot_ID, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], self.client)
         # Reset joints
@@ -100,7 +95,6 @@ class Talos:
         for i in self.non_controlled_joints_to_reset:
             p.resetJointState(self._robot_ID, i, 0.0, 0.0, self.client)
         pass
-
 
     # Move joints of the robot to desired positon and velocity
     # @input
@@ -112,27 +106,26 @@ class Talos:
     # - real_time : boolean to run the simulation in real time.
     def moveRobot(self, q_des, v_des, real_time=False, printInfos=False):
         # Check if arguments are valid
-        if len(self.controlled_joints)!=len(q_des) or len(q_des)!=len(v_des):
-            print("controlled_joints:",len(self.controlled_joints),", q_des:",len(q_des)," v_des:",len(v_des))
+        if len(self.controlled_joints) != len(q_des) or len(q_des) != len(v_des):
+            print("controlled_joints:", len(self.controlled_joints), ", q_des:", len(q_des), " v_des:", len(v_des))
             input("ERROR, q_des/v_des/controlled_joints have different sizes")
         # Run simulation
         time_simulation = 0.0
-        while time_simulation<DT_PD:
-            if real_time: 
+        while time_simulation < DT_PD:
+            if real_time:
                 t_start = time.time()
             # Compute torques
             q_mes, v_mes = self._getJointsState(self.controlled_joints)
             torques = self._computePDTorques(np.array(q_des), np.array(q_mes), np.array(v_des), np.array(v_mes))
             if printInfos:
                 print("------")
-                print("q_mes: ",np.round(q_mes,4))
-                print("q_des: ",np.round(q_des,4))
-                print("torques : ",np.round(torques))
+                print("q_mes: ", np.round(q_mes, 4))
+                print("q_des: ", np.round(q_des, 4))
+                print("torques : ", np.round(torques))
             # Apply torques on robot
             p.setJointMotorControlArray(self._robot_ID, self.controlled_joints,
-                                        controlMode=p.TORQUE_CONTROL, forces=torques) # There is another function if we run it on the real robot.
-<<<<<<< Updated upstream
-=======
+                                        controlMode=p.TORQUE_CONTROL,
+                                        forces=torques)  # There is another function if we run it on the real robot.
             # Increment time
             time_simulation += DT
             # Run simulation
@@ -146,16 +139,16 @@ class Talos:
     def moveRobot_torques(self, torques, real_time=True, printInfos=False):
         time_simulation = 0.0
         if printInfos:
-            print("torques : ",np.round(torques,1))
+            print("torques : ", np.round(torques, 1))
         # "Constant torques are applied for the duration of a control step" as in : https://arxiv.org/pdf/1611.01055.pdf
-        while time_simulation<DT_PD:
-            if real_time: 
+        while time_simulation < DT_PD:
+            if real_time:
                 t_start = time.time()
             # Apply torques on robot
             p.setJointMotorControlArray(self._robot_ID, self.controlled_joints,
-                                        controlMode=p.TORQUE_CONTROL, forces=torques) # There is another function if we run it on the real robot.
-            #q_mes, v_mes = self._getJointsState(self.controlled_joints)
->>>>>>> Stashed changes
+                                        controlMode=p.TORQUE_CONTROL,
+                                        forces=torques)  # There is another function if we run it on the real robot.
+            # q_mes, v_mes = self._getJointsState(self.controlled_joints)
             # Increment time
             time_simulation += DT
             # Run simulation
@@ -164,9 +157,6 @@ class Talos:
             if real_time:
                 while (time.time() - t_start) < DT:
                     pass
-<<<<<<< Updated upstream
-        pass
-=======
         return None
 
     # ============================================================================================
@@ -175,29 +165,30 @@ class Talos:
     # Formula : torques =
     def _get_max_torques_joints(self, joint_indices):
         # Compute list of torques from min to max joint positions
-        min_pos_joints = [ self.joints_bound_pos_all[i][0] for i in joint_indices ]
-        max_pos_joints = [ self.joints_bound_pos_all[i][1] for i in joint_indices ]
-        null_values = [ 0. for _ in joint_indices ]
-        max_torques = self._computePDTorques(np.array(min_pos_joints), np.array(max_pos_joints), 
+        min_pos_joints = [self.joints_bound_pos_all[i][0] for i in joint_indices]
+        max_pos_joints = [self.joints_bound_pos_all[i][1] for i in joint_indices]
+        null_values = [0. for _ in joint_indices]
+        max_torques = self._computePDTorques(np.array(min_pos_joints), np.array(max_pos_joints),
                                              np.array(null_values), np.array(null_values)
-                                            ).tolist()
+                                             ).tolist()
         # Compute torques bounds
         joints_bound_torques = []
         for i in range(len(joint_indices)):
-            joints_bound_torques.append( [-max_torques[i]/DIVIDE_BOUNDS_TORQUES, max_torques[i]/DIVIDE_BOUNDS_TORQUES] )
+            joints_bound_torques.append(
+                [-max_torques[i] / DIVIDE_BOUNDS_TORQUES, max_torques[i] / DIVIDE_BOUNDS_TORQUES])
         return joints_bound_torques
->>>>>>> Stashed changes
 
     # ================================================================
 
     # - All joints
     # Get angle position and velocity of each joint.
-    # @output 
+    # @output
     # - q_mes : list of joint angles (in radians)
     # - v_mes : list of joint angular velocities (in radians/sec)
     def getJointsState(self):
         q_mes, v_mes = self._getJointsState(self.all_joints)
         return q_mes, v_mes
+
     # Get joints bound : Position (angle) and Velocity (angular vel)
     def getJointsBounds(self):
         q_bounds, v_bounds = self.joints_bound_pos_all, self.joints_bound_vel_all
@@ -205,12 +196,13 @@ class Talos:
 
     # - Controlled joints
     # Get controlled joints state : Position (angle) and Velocity (angular vel)
-    # @output 
+    # @output
     # - q_mes : list of joint angles (in radians)
     # - v_mes : list of joint angular velocities (in radians/sec)
     def getControlledJointsState(self):
         q_mes, v_mes = self._getJointsState(self.controlled_joints)
         return q_mes, v_mes
+
     # Get joints bound : Position (angle) and Velocity (angular vel)
     def getControlledJointsBounds(self):
         q_bounds, v_bounds = self.joints_bound_pos, self.joints_bound_vel
@@ -226,6 +218,7 @@ class Talos:
         base_pos = [value for value in b_pos]
         base_orientation = [value for value in b_orientation]
         return base_pos, base_orientation
+
     # Get velocity of the base of the robot.
     # @output
     # - lin_vel : linear velocity
@@ -235,20 +228,19 @@ class Talos:
         lin_vel = [value for value in l_vel]
         ang_vel = [value for value in a_vel]
         return lin_vel, ang_vel
+
     # [Info] There are no bounds for Base, you need to define it in your environment.
-    
 
     # ====================================================================================================================
 
     def printControlledJoints(self):
         print("List of controlled joints:")
         for i in self.controlled_joints:
-            print(" - ",self.all_joints_names[i])
-            print("   Gains: P=",self.gains_P[i]," D=",self.gains_D[i])
+            print(" - ", self.all_joints_names[i])
+            print("   Gains: P=", self.gains_P[i], " D=", self.gains_D[i])
         pass
 
     # ====================================================================================================================
-
 
     # Compute PD torques.
     # @input
@@ -259,46 +251,45 @@ class Talos:
     # @output
     # - torques : torques to apply on joints
     def _computePDTorques(self, q_des, q_mes, v_des, v_mes):
-        torques = self.gains_P_controlled * (q_des - q_mes) * MULTIPLY_ALL_GAINS_P + self.gains_D_controlled * (v_des - v_mes) * MULTIPLY_ALL_GAINS_D
-        torques = np.array([min(t,MAX_TORQUES) for t in torques])
+        torques = self.gains_P_controlled * (q_des - q_mes) * MULTIPLY_ALL_GAINS_P + self.gains_D_controlled * (
+                    v_des - v_mes) * MULTIPLY_ALL_GAINS_D
+        torques = np.array([min(t, MAX_TORQUES) for t in torques])
         return torques
-
-
 
     # ===================================================================================================================
 
     def _getcontrolled_joints(self):
         non_controlled_joints = [
-            #"torso_1_joint",# Other Body Joints
-            #"torso_2_joint",
-            #"head_1_joint",
-            #"head_2_joint",
-            #"arm_left_1_joint",#Left Joints
-            #"arm_left_2_joint",
-            #"arm_left_3_joint",
-            #"arm_left_4_joint",
-            #"arm_left_5_joint",
-            #"arm_left_6_joint",
-            #"arm_left_7_joint",
-            #"arm_right_1_joint",#Right Joints
-            #"arm_right_2_joint",
-            #"arm_right_3_joint",
-            #"arm_right_4_joint",
-            #"arm_right_5_joint",
-            #"arm_right_6_joint",
-            #"arm_right_7_joint",
-            #"leg_left_1_joint", #Left Leg
-            #"leg_left_2_joint",
-            #"leg_left_3_joint",
-            #"leg_left_4_joint",
-            #"leg_left_5_joint",
-            #"leg_left_6_joint",
-            #"leg_right_1_joint", #right Leg
-            #"leg_right_2_joint",
-            #"leg_right_3_joint",
-            #"leg_right_4_joint",
-            #"leg_right_5_joint",
-            #"leg_right_6_joint",
+            # "torso_1_joint",# Other Body Joints
+            # "torso_2_joint",
+            # "head_1_joint",
+            # "head_2_joint",
+            # "arm_left_1_joint",#Left Joints
+            # "arm_left_2_joint",
+            # "arm_left_3_joint",
+            # "arm_left_4_joint",
+            # "arm_left_5_joint",
+            # "arm_left_6_joint",
+            # "arm_left_7_joint",
+            # "arm_right_1_joint",#Right Joints
+            # "arm_right_2_joint",
+            # "arm_right_3_joint",
+            # "arm_right_4_joint",
+            # "arm_right_5_joint",
+            # "arm_right_6_joint",
+            # "arm_right_7_joint",
+            # "leg_left_1_joint", #Left Leg
+            # "leg_left_2_joint",
+            # "leg_left_3_joint",
+            # "leg_left_4_joint",
+            # "leg_left_5_joint",
+            # "leg_left_6_joint",
+            # "leg_right_1_joint", #right Leg
+            # "leg_right_2_joint",
+            # "leg_right_3_joint",
+            # "leg_right_4_joint",
+            # "leg_right_5_joint",
+            # "leg_right_6_joint",
             "imu_joint",  # Other joints not used
             "rgbd_joint",
             "rgbd_optical_joint",
@@ -309,7 +300,7 @@ class Talos:
             "wrist_left_ft_joint",  # LEFT GRIPPER
             "wrist_left_tool_joint",
             "gripper_left_base_link_joint",
-            "gripper_left_joint", # This is controllable
+            "gripper_left_joint",  # This is controllable
             "gripper_left_inner_double_joint",
             "gripper_left_fingertip_1_joint",
             "gripper_left_fingertip_2_joint",
@@ -319,7 +310,7 @@ class Talos:
             "wrist_right_ft_joint",  # RIGHT GRIPPER
             "wrist_right_tool_joint",
             "gripper_right_base_link_joint",
-            "gripper_right_joint", # This is controllable
+            "gripper_right_joint",  # This is controllable
             "gripper_right_inner_double_joint",
             "gripper_right_fingertip_1_joint",
             "gripper_right_fingertip_2_joint",
@@ -329,9 +320,10 @@ class Talos:
             "leg_left_sole_fix_joint",  # LEFT LEG (blocked)
             "leg_right_sole_fix_joint"  # RIGHT LEG (blocked)
         ]
-        all_joints_names   = [p.getJointInfo(self._robot_ID, i)[1].decode() for i in range(p.getNumJoints(self._robot_ID))]  # Name of all joints
+        all_joints_names = [p.getJointInfo(self._robot_ID, i)[1].decode() for i in
+                            range(p.getNumJoints(self._robot_ID))]  # Name of all joints
         all_joints = [i for i in range(0, len(all_joints_names))]
-        controlled_joints  = [i for (i, n) in enumerate(all_joints_names) if n not in non_controlled_joints]
+        controlled_joints = [i for (i, n) in enumerate(all_joints_names) if n not in non_controlled_joints]
         """
         print("Joints controlled : ")
         for i in controlled_joints:
@@ -343,21 +335,21 @@ class Talos:
         joints_bound_pos, joints_bound_vel = [], []
         for i in joints_indices:
             info = p.getJointInfo(self._robot_ID, i)
-            joints_bound_pos.append(info[8:10]) # Pos
-            joints_bound_vel.append([-info[11],info[11]])   # Vel
+            joints_bound_pos.append(info[8:10])  # Pos
+            joints_bound_vel.append([-info[11], info[11]])  # Vel
         return joints_bound_pos, joints_bound_vel
 
     def _getGainsPD(self, joints_indices):
         gains_P, gains_D = [], []
         # These gains are from another work on TALOS. This may need to be modified.
         gains_P_complete = np.array([
-                200.,  200.,                                   # TORSO 0-1
-                30., 30.,                                      # HEAD 2-3
-                200.,  400.,  100.,  100.,  10.,  10.,  10.,   # LEFT ARM 4-10
-                200.,  400.,  100.,  100.,  10.,  10.,  10.,   # RIGHT ARM 11-17
-                100.,  100.,  100.,  100.,  100.,  100.,       # LEFT LEG 18-23
-                100.,  100.,  100.,  100.,  100.,  100.,       # RIGHT LEG 24-29
-            ])
+            200., 200.,  # TORSO 0-1
+            30., 30.,  # HEAD 2-3
+            200., 400., 100., 100., 10., 10., 10.,  # LEFT ARM 4-10
+            200., 400., 100., 100., 10., 10., 10.,  # RIGHT ARM 11-17
+            100., 100., 100., 100., 100., 100.,  # LEFT LEG 18-23
+            100., 100., 100., 100., 100., 100.,  # RIGHT LEG 24-29
+        ])
         """
         gains_D_complete = np.array([
                 10.,  10.,                          # TORSO 0-1
@@ -369,13 +361,13 @@ class Talos:
             ])
         """
         gains_D_complete = np.array([
-                1.,  1.,                          # TORSO 0-1
-                0.1, 0.1,                           # HEAD 2-3
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # LEFT ARM 4-10
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # RIGHT ARM 11-17
-                20.,  20.,  20.,  20.,  20.,  20.,  # LEFT LEG 18-23
-                20.,  20.,  20.,  20.,  20.,  20.,  # RIGHT LEG 24-29
-            ])
+            1., 1.,  # TORSO 0-1
+            0.1, 0.1,  # HEAD 2-3
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # LEFT ARM 4-10
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # RIGHT ARM 11-17
+            20., 20., 20., 20., 20., 20.,  # LEFT LEG 18-23
+            20., 20., 20., 20., 20., 20.,  # RIGHT LEG 24-29
+        ])
         # Map these gains to controlled joints
         # Mapping done with this :
         """
@@ -383,38 +375,38 @@ class Talos:
             print(i," - ",self.all_joints_names[i])
         """
         map_gains_to_joints = [
-                                0,1,                    # TORSO 0-1
-                                3,4,                    # HEAD 2-3
-                                11,12,13,14,15,16,17,   # LEFT ARM 4-10
-                                28,29,30,31,32,33,34,   # RIGHT ARM 11-17
-                                45,46,47,48,49,50,      # LEFT LEG 18-23
-                                52,53,54,55,56,57       # RIGHT LEG 24-29
-                              ]
+            0, 1,  # TORSO 0-1
+            3, 4,  # HEAD 2-3
+            11, 12, 13, 14, 15, 16, 17,  # LEFT ARM 4-10
+            28, 29, 30, 31, 32, 33, 34,  # RIGHT ARM 11-17
+            45, 46, 47, 48, 49, 50,  # LEFT LEG 18-23
+            52, 53, 54, 55, 56, 57  # RIGHT LEG 24-29
+        ]
         map_joints_to_gains = [
-                                            0,1,    # Torso 0-1
-                                            None,   # imu 2
-                                            2,3,    # Head  3-4
-                                            None, None, None, None, None, None, # rgbd 6-9
-                                            4,5,6,7,8,9,10,       # Left arm  11-17
-                                            None, None, None, None, None, None, None, None, None, None, # wrist / gripper left  18-27
-                                            11,12,13,14,15,16,17, # Right arm 28-34
-                                            None, None, None, None, None, None, None, None, None, None, # wrist / gripper right 35-44
-                                            18,19,20,21,22,23,  # Left leg   45-50
-                                            None, # leg_left_sole_fix_joint  51
-                                            24,25,26,27,28,29,  # Right leg  52-57
-                                            None # right_left_sole_fix_joint 52
-                              ]
+            0, 1,  # Torso 0-1
+            None,  # imu 2
+            2, 3,  # Head  3-4
+            None, None, None, None, None, None,  # rgbd 6-9
+            4, 5, 6, 7, 8, 9, 10,  # Left arm  11-17
+            None, None, None, None, None, None, None, None, None, None,  # wrist / gripper left  18-27
+            11, 12, 13, 14, 15, 16, 17,  # Right arm 28-34
+            None, None, None, None, None, None, None, None, None, None,  # wrist / gripper right 35-44
+            18, 19, 20, 21, 22, 23,  # Left leg   45-50
+            None,  # leg_left_sole_fix_joint  51
+            24, 25, 26, 27, 28, 29,  # Right leg  52-57
+            None  # right_left_sole_fix_joint 52
+        ]
 
         # Get gains of joints in parameter
         for i in joints_indices:
             index_in_gains = map_joints_to_gains[i]
-            gains_P.append( gains_P_complete[index_in_gains] )
-            gains_D.append( gains_D_complete[index_in_gains] )
+            gains_P.append(gains_P_complete[index_in_gains])
+            gains_D.append(gains_D_complete[index_in_gains])
         return gains_P, gains_D
 
     # - List of joints
     # Get angle position and velocity of each joint.
-    # @output 
+    # @output
     # - q_mes : list of joint angles (in radians)
     # - v_mes : list of joint angular velocities (in radians/sec)
     def _getJointsState(self, listJoints):
@@ -427,86 +419,8 @@ class Talos:
     def _run_test():
         from Robots.ressources.plane import Plane
         robot = Talos(Plane, GUI=True)
-        q_des = np.array([0.]*len(robot.controlled_joints))
-        # Default position (crouch)
-        q_des = [   0.00000e+00, 6.76100e-03, # Torso
-                    0.00000e+00, 0.00000e+00, # Head
-                    2.58470e-01,1.73046e-01,-2.00000e-04,-5.25366e-01,0.00000e+00,0.00000e+00,1.00000e-01, # Left arm
-                    -2.58470e-01,-1.73046e-01, 2.00000e-04,-5.25366e-01, 0.00000e+00, 0.00000e+00, 1.00000e-01, # Right arm
-                    0.00000e+00, 0.00000e+00,-4.11354e-01, 8.59395e-01,-4.48041e-01,-1.70800e-03, # Left leg
-                    0.00000e+00, 0.00000e+00,-4.11354e-01, 8.59395e-01,-4.48041e-01,-1.70800e-03  # Right leg
-                ]
-        v_des = np.array([0.]*len(robot.controlled_joints))
-        i = 0
-        counter_reset = 300
-        while True:
-            robot.moveRobot(q_des, v_des, real_time=True, printInfos=False)
-            i+=1
-            print(i,"/",counter_reset)
-            if i%counter_reset==0: 
-                robot.reset()
-                i=0
-    
-
-
-    @staticmethod
-    def _run_test_reset():
-        from Robots.ressources.plane import Plane
-        robot = Talos(Plane, GUI=True)
-        q_des = np.array([0.]*len(robot.controlled_joints))
-        # Default position (crouch)
-        q_des = [   0.00000e+00, 6.76100e-03, # Torso
-                    0.00000e+00, 0.00000e+00, # Head
-                    2.58470e-01,1.73046e-01,-2.00000e-04,-5.25366e-01,0.00000e+00,0.00000e+00,1.00000e-01, # Left arm
-                    -2.58470e-01,-1.73046e-01, 2.00000e-04,-5.25366e-01, 0.00000e+00, 0.00000e+00, 1.00000e-01, # Right arm
-                    0.00000e+00, 0.00000e+00,-4.11354e-01, 8.59395e-01,-4.48041e-01,-1.70800e-03, # Left leg
-                    0.00000e+00, 0.00000e+00,-4.11354e-01, 8.59395e-01,-4.48041e-01,-1.70800e-03  # Right leg
-                ]
-        v_des = np.array([0.]*len(robot.controlled_joints))
-        i = 0
-        counter_reset = 100
-        max_tab_check = 15
-        tab_states = []
-        while True:
-            # Test configs
-            if len(tab_states)<max_tab_check:
-                q, v = robot.getJointsState()
-                tab_states.append(q+v)
-            else:
-                if i<max_tab_check:
-                    q, v = robot.getJointsState()
-                    state = q+v
-                    same = True
-                    for j,value_original in enumerate(tab_states[i]):
-                        index = j
-                        if state[index]!=value_original:
-                            print("different : ",robot.all_joints_names[index%len(q)])
-                            same=False
-                            input("...")
-                    if not same:
-                        print("Last different:")
-                        print("  q: ",q)
-                        print("   : ",tab_states[i][0:len(q)])
-                        print("  v: ",v)
-                        print("   : ",tab_states[i][len(q):-1])
-                        input("Not same ...")
-            # Move robot
-            robot.moveRobot(q_des, v_des, real_time=True, printInfos=False)
-            # Reset
-            i+=1
-            print(i,"/",counter_reset)
-            if i%counter_reset==0: 
-                robot.reset()
-                i=0
-<<<<<<< Updated upstream
-
-    @staticmethod
-    def _run_test_joints_limit():
-        from Robots.ressources.plane import Plane
-        robot = Talos(Plane, GUI=True)
         q_des = np.array([0.] * len(robot.controlled_joints))
         # Default position (crouch)
-        # Default qdes
         q_des = [0.00000e+00, 6.76100e-03,  # Torso
                  0.00000e+00, 0.00000e+00,  # Head
                  2.58470e-01, 1.73046e-01, -2.00000e-04, -5.25366e-01, 0.00000e+00, 0.00000e+00, 1.00000e-01,
@@ -516,44 +430,66 @@ class Talos:
                  0.00000e+00, 0.00000e+00, -4.11354e-01, 8.59395e-01, -4.48041e-01, -1.70800e-03,  # Left leg
                  0.00000e+00, 0.00000e+00, -4.11354e-01, 8.59395e-01, -4.48041e-01, -1.70800e-03  # Right leg
                  ]
-        # Default vdes
         v_des = np.array([0.] * len(robot.controlled_joints))
         i = 0
-        counter = 100
-        done = False
-        while not done:
-            robot.moveRobot(q_des, v_des, real_time=True)
-            i+=1
-            if i%counter == 0:
-                done = True
-        # Test bounds of each joints
-        input("Start test for each joint ... (press key)")
-        for index_joint, bound in enumerate(robot.joints_bound_pos):
-            print("==== Joint ", index_joint, " : ")
-            for j in range(2):  # Min and Max
-                value = bound[j]
-                print("value tested = ", value)
-                q_des_aux = q_des.copy()
-                q_des_aux[index_joint] = value
+        counter_reset = 300
+        while True:
+            robot.moveRobot(q_des, v_des, real_time=True, printInfos=False)
+            i += 1
+            print(i, "/", counter_reset)
+            if i % counter_reset == 0:
+                robot.reset()
                 i = 0
-                done = False
-                while not done:
-                    robot.moveRobot(q_des_aux, v_des, real_time=True)
-                    i += 1
-                    if i % counter == 0:
-                        done = True
-                        input("Press key...")
-                # Reset to default position
-                i = 0
-                done = False
-                while not done:
-                    robot.moveRobot(q_des, v_des, real_time=True)
-                    i += 1
-                    if i % counter == 0:
-                        done = True
-        pass
 
-    #_run_test_joints_limit()
-=======
+    @staticmethod
+    def _run_test_reset():
+        from Robots.ressources.plane import Plane
+        robot = Talos(Plane, GUI=True)
+        q_des = np.array([0.] * len(robot.controlled_joints))
+        # Default position (crouch)
+        q_des = [0.00000e+00, 6.76100e-03,  # Torso
+                 0.00000e+00, 0.00000e+00,  # Head
+                 2.58470e-01, 1.73046e-01, -2.00000e-04, -5.25366e-01, 0.00000e+00, 0.00000e+00, 1.00000e-01,
+                 # Left arm
+                 -2.58470e-01, -1.73046e-01, 2.00000e-04, -5.25366e-01, 0.00000e+00, 0.00000e+00, 1.00000e-01,
+                 # Right arm
+                 0.00000e+00, 0.00000e+00, -4.11354e-01, 8.59395e-01, -4.48041e-01, -1.70800e-03,  # Left leg
+                 0.00000e+00, 0.00000e+00, -4.11354e-01, 8.59395e-01, -4.48041e-01, -1.70800e-03  # Right leg
+                 ]
+        v_des = np.array([0.] * len(robot.controlled_joints))
+        i = 0
+        counter_reset = 100
+        max_tab_check = 15
+        tab_states = []
+        while True:
+            # Test configs
+            if len(tab_states) < max_tab_check:
+                q, v = robot.getJointsState()
+                tab_states.append(q + v)
+            else:
+                if i < max_tab_check:
+                    q, v = robot.getJointsState()
+                    state = q + v
+                    same = True
+                    for j, value_original in enumerate(tab_states[i]):
+                        index = j
+                        if state[index] != value_original:
+                            print("different : ", robot.all_joints_names[index % len(q)])
+                            same = False
+                            input("...")
+                    if not same:
+                        print("Last different:")
+                        print("  q: ", q)
+                        print("   : ", tab_states[i][0:len(q)])
+                        print("  v: ", v)
+                        print("   : ", tab_states[i][len(q):-1])
+                        input("Not same ...")
+            # Move robot
+            robot.moveRobot(q_des, v_des, real_time=True, printInfos=False)
+            # Reset
+            i += 1
+            print(i, "/", counter_reset)
+            if i % counter_reset == 0:
+                robot.reset()
+                i = 0
         pass
->>>>>>> Stashed changes
