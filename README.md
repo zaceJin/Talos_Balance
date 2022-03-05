@@ -9,8 +9,9 @@ It is a very simple reward that may not work for now, and would require to tune 
 Classes to control Solo and Talos robots in pybullet with a simple PD controller.
 Robots URDF : https://github.com/Gepetto/example-robot-data/tree/master/robots in talos_data and solo_description.
 
-You can select the robot in env0.py, variable NAME_ROBOT.
-Modify all the parameters in env0.py in function of the RL task to perform.
+You can select the environment used in run_env.py, variable MODE_CONTROL.
+You can select the robot in the environments (env_PD or env_torques), variable NAME_ROBOT.
+Modify all the parameters in the environments (env_PD or env_torques) in function of the RL task to perform.
 
 ### Variables
 - **[TO SET] ``PATH_URDF`` : Path to the URDF file of the robot (You need to set it for each robot).**
@@ -20,6 +21,7 @@ Modify all the parameters in env0.py in function of the RL task to perform.
 - ``FREQUENCY_TALOS_HZ``, ``GAINS_P_ALL``, ``GAINS_D_ALL`` : These values need to be tuned if the robot does not have enough strength (can not move) or his actions are jerky and unstable. You can test different combination of gains and frequencies with the class test_PD.py
 - ``FREQUENCY_UPDATE_CONTROL_HZ`` : Frequency at which we update q_des and v_des on the PD controller. 50 hz is a very low value and we may need to increase it.
 - (For Solo) ``SOLO_NAME`` : Select solo8 or solo12. Solo12 has 4 more controlled joints on shoulders.
+- (If torques control) ``DIVIDE_BOUNDS_TORQUES`` : Divide the torques bounds. This limits the torques actions in the environment (the robot flies in pybullet if too large).
                                                  
 ### Functions
 - ``reset()`` : Reset the robot position/orientation and forces applied on it. The robot's starting configuration is defined by parameters ``_robot_start_pos`` and ```_robot_start_orientation``.
@@ -32,6 +34,7 @@ Modify all the parameters in env0.py in function of the RL task to perform.
 - ``getJointsBounds()`` : Return bounds for q_mes and v_mes of all joints.
 - ``getControlledJointsState()``  : Return q_mes and v_mes of controlled joints.
 - ``getControlledJointsBounds()`` : Return bounds for q_mes and v_mes of controlled joints.
+- ``getControlledJointsTorquesBounds()``  : Return joints_bound_torques of controlled joints.
 - ``getBasePosOri()`` : Return base position and orientation.
 - ``getBaseVel()``    : Return base linear and angular velocity.
 
