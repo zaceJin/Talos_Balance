@@ -30,7 +30,7 @@ def make_env(env_id, rank, seed=0):
     set_global_seeds(seed)
     return _init
 
-"""
+
 from stable_baselines.common.policies import FeedForwardPolicy
 class CustomPolicy(FeedForwardPolicy):
     name = 'CustomPolicy'
@@ -42,7 +42,7 @@ class CustomPolicy(FeedForwardPolicy):
                                                     ],
                                            feature_extraction="mlp"
                                           )
-"""
+
 
 
 def getModel(envVec):
@@ -120,5 +120,5 @@ if __name__ == "__main__":
     else:
         #model_name = None
         #model_name = "/devel/hpp/src/robots_RL/logs/model__880000_steps"
-        model_name = "/devel/hpp/src/robots_RL/logs_solo_stand_torque/model__880000_steps" 
+        model_name = "G:/Year5/robots_RL/logs/model__1520000_steps"
         play(model_name)

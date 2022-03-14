@@ -63,7 +63,7 @@ class Env_PD(gym.Env):
         print("action_dim should be : nb_controlled_joints  => ",self.action_dim)
         """
         # Bounds of robot base
-        self.bound_base_pos = [ [-20,20], [-20,20], [-0.2, Config.HEIGHT_ROOT+0.3] ] # TO MODIFY
+        self.bound_base_pos = [ [-20,20], [-20,20], [-0.2, Config.HEIGHT_ROOT+1.2] ] # TO MODIFY
         self.bound_base_ori = [[-1,1]]*4    # Quaternion
         self.bound_base_lin_vel = [ [-1,1], [-1,1], [-1,1] ]                  # TO MODIFY
         self.bound_base_ang_vel = [[-4*np.pi,4*np.pi]]*3                      # TO MODIFY

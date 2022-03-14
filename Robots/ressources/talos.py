@@ -5,6 +5,7 @@ import pybullet_data
 import example_robot_data
 import time
 
+from Robots.ressources.config import Config
 PATH_URDF = "/opt/openrobots/share/example-robot-data/robots/talos_data/robots"
 
 HIGH_GAINS = False  # Two setup for GAINS. The high gains are the one used by Gepetto team. But in RL, we have to lower it (keep False) => To tune.
@@ -255,7 +256,7 @@ class Talos:
     # @output
     # - torques : torques to apply on joints
     def _computePDTorques(self, q_des, q_mes, v_des, v_mes):
-        torques = self.gains_P * (q_des - q_mes) + self.gains_D * (v_des - v_mes)
+        torques = self.gains_P_controlled * (q_des - q_mes) + self.gains_D_controlled * (v_des - v_mes)
         torques = np.array([np.copysign(min(abs(t),MAX_TORQUES),t) for t in torques])
         #print(torques)
         return torques
@@ -267,8 +268,8 @@ class Talos:
         non_controlled_joints = [
             #"torso_1_joint",# Other Body Joints
             #"torso_2_joint",
-            #"head_1_joint",
-            #"head_2_joint",
+            "head_1_joint",
+            "head_2_joint",
             #"arm_left_1_joint",#Left Joints
             #"arm_left_2_joint",
             #"arm_left_3_joint",

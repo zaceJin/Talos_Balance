@@ -6,15 +6,15 @@ class Config:
 	#MODE_CONTROL = CONTROL_LIST[1] # Torque
 	if MODE_CONTROL=="PD":
 	    ENV_ROBOT_ID = 'env_robot-v0' # Name in Robots/__init__.py
-	    NB_MAX_STEPS = 300 # To tune, 300 steps should be more than enough.
+	    NB_MAX_STEPS = 1500 # To tune, 300 steps should be more than enough.
 	elif MODE_CONTROL=="TORQUE":
 	    ENV_ROBOT_ID = 'env_robot-v1' # Name in Robots/__init__.py
-	    NB_MAX_STEPS = 300 # To tune
+	    NB_MAX_STEPS = 1500 # To tune
 
 	# ========= Robot selection =========
 	ROBOT_LIST = ["talos","solo"]
-	#NAME_ROBOT = ROBOT_LIST[0] # talos
-	NAME_ROBOT = ROBOT_LIST[1] # solo
+	NAME_ROBOT = ROBOT_LIST[0] # talos
+	#NAME_ROBOT = ROBOT_LIST[1] # solo
 
 	# ========= Height of robot and death treshold ========= 
 	if NAME_ROBOT=="talos":
